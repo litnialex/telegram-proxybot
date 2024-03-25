@@ -1,0 +1,6 @@
+__pycache__/
+.vscode
+.env
+ssl/
+data/
+tmp/

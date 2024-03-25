@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  proxybot:
+    image: proxybot
+    build: .
+    container_name: proxybot
+    hostname: proxybot
+    restart: unless-stopped
+    init: true
+    ports:
+      - 8080:8080/tcp
+      - 8443:8443/tcp
+    volumes:
+      - ./ssl:/app/ssl
+    environment:
+      - TELEGRAM_ID
+      - DB_URI=${DB_URI:-mongodb://mongodb}
+      - VERBOSE=${VERBOSE:-yes}
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    hostname: mongodb
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:27017:27017
+    command: mongod --quiet --noauth --bind_ip_all
