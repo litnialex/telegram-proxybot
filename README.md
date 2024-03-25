@@ -12,17 +12,21 @@ Check yourself.
 
 # Run proxybot as a service
 The easest way to check how proxybot works is through 2 simple steps:
-1. Get your bot's API token from @botFather
-2. Go to @cloudrunbot, run /newbot and insert the API token of your bot
+1. Get your bot's API token from [@botFather](https://t.me/BotFather)
+2. Go to [@cloudrunbot](https://t.me/cloudrunbot), run /newbot and insert the API token of your bot
 
 Every bot registration gets a few months of free service and in the meanwhile you can activate suscription or choose to launch by your own.
 
 # Launch by your own
 Proxybot can be launched as a serverless function, as a docker container or as a Flask applicaiton. 
 
-In any of this scenarios you will  need to supply a working MongoDB connection and populate it through `DB_URI` variable. MongoDB is used to store proxybot settings and connections tracking information. You may start with [[https://www.mongodb.com/docs/atlas/|MongoDB Atlas]] free tier.
+In any of this scenarios you will  need to supply a working MongoDB connection and populate it through `DB_URI` variable. 
+MongoDB is used to store proxybot settings and connections tracking information. 
+You may start with [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) free tier.
 
-`TELEGRAM_ID` variable should have as value the ID of a Telegram account  assigned "proxybot owner" privilege. It doesn't need to be the same as bot's API token owner, and, by the way, it is impossible to find out which Telegram account is owning a bot.
+`TELEGRAM_ID` variable should have as value the ID of a Telegram account  assigned "proxybot owner" privilege. 
+If you want to find out your TELEGRAM_ID ask [@my_id_bot ](https://t.me/my_id_bot)
+
 
 ## Launch as a serverless function
 Here is an example how to launch in Google Functions using Google's `gcloud` command:
