@@ -11,11 +11,11 @@ Proxybot provides full privacy for your personal telegram account and allows han
 Check yourself.
 
 # Run proxybot as a service
-The easest way to check how proxybot works is through 2 simple steps:
-1. Get your bot's API token from [@botFather](https://t.me/BotFather)
-2. Go to [@cloudrunbot](https://t.me/cloudrunbot), run /newbot and insert the API token of your bot
+Our  [@InitProxybot](https://t.me/InitProxybot) can launch your proxybot in the cloud within seconds.
 
-Every bot registration gets a few months of free service and in the meanwhile you can activate suscription or choose to launch by your own.
+This is offered as a service from our team with an annaul subscription fee of just $20.
+
+Register now and get 4 months for free, no prepay needed!
 
 # Launch by your own
 Proxybot can be launched as a serverless function, as a docker container or as a Flask applicaiton. 
