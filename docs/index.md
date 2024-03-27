@@ -1,8 +1,10 @@
 # How it works
 
-Proxybot is a telegram bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner. Telegram group can also be a supergroup with threads (topics).
+Proxybot is a telegram bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner.
+This group can also be a supergroup with threads (topics).
 
-Replies are done simply texting back in the chat. Such messages always go to the last contact in  that chat. Of course you can select any message and reply to that specific message.
+Replies are done simply texting back in the chat. Such messages always go to the last contact in  that chat.
+Of course you can select any message and reply to that specific message.
 
 Sound, video and all other media formats supported by Telegram can be proxied in this manner.
 
@@ -25,7 +27,7 @@ MongoDB is used to store proxybot settings and connections tracking information.
 You may start with [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) free tier.
 
 `TELEGRAM_ID` variable should have as value the ID of a Telegram account  assigned "proxybot owner" privilege. 
-If you want to find out your TELEGRAM_ID ask [@my_id_bot ](https://t.me/my_id_bot)
+If you want to find out your telegram ID ask [@my_id_bot ](https://t.me/my_id_bot)
 
 
 ## Launch as a serverless function
@@ -34,33 +36,34 @@ Here is an example how to launch in Google Functions using Google's `gcloud` com
 TELEGRAM_ID=1234123123
 DB_URI="mongodb+srv://***:**********@cluster0._______.mongodb.net/"
 REGION=europe-west1
-gcloud functions deploy --gen2 --runtime=python310 --trigger-http \
-	--entry-point=entrypoint --allow-unauthenticated \
-	--set-env-vars=TELEGRAM_ID=${TELEGRAM_ID},DB_URI=${DB_URI} \
+gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
+    --trigger-http --entry-point=entrypoint --allow-unauthenticated \
+	--set-env-vars=TELEGRAM_ID=$TELEGRAM_ID,DB_URI=$DB_URI \
 	--source=proxybot/ proxybot
 ```
 
 This command, run from the repository root folder, will upload contents of `proxybot` subfolder into Google Functions with name `proxybot`.
 
-Lastly a `setWebhook` bot API method should be called to start receiving updates from Telegram by serverless function. 
+Lastly, a `setWebhook` bot API method should be called to start receiving updates from Telegram by serverless function. 
 ```
 CLOUD_URL=https://***********.cloudfunctions.net/proxybot
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
 curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
-Replace TELEGRAM_ID, DB_URI, REGION, CLOUD_URL, TOKEN values from these examples with your data.
+Replace `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` values from these examples with your data.
 
 ## Launch in Docker
-You can build and launch proxybot in Docker container.
+You can build and launch proxybot as a Docker container.
 
-Docker running host must have an IP address or a Fully Qualified Domain Name reachable globally set as `HOST` variable
+`HOST` must be a real IP address or a fully qualified domain name of your Docker host.
 ```
 HOST=proxybot.example.com
 ```
 
-
-And SSL certificate for HTTPS. In this example we are creating a self-signed certificate valid for 10 years, and later it will be used in `setWebhook` method.
+A valid (may be self-signed) SSL certificate is needed for HTTPS.
+In this example we are creating a self-signed certificate valid for 10 years,
+and later it will be used in `setWebhook` method.
 ```
 openssl req -newkey rsa:2048 -sha256 -nodes -keyout ssl/privkey.pem -x509 -days 3650 -out ssl/cert.pem -subj "/CN=${HOST}"
 ```
@@ -71,7 +74,9 @@ TELEGRAM_ID=1234123123
 docker compose up
 ```
 
-This builds `proxybot` container and uses standard `mongo:latest` container to provide a working MongoDB  connection available as ```DB_URI=mongodb://mongodb``` from inside `proxybot` container. Refer to `docker-compose.yml` for details.
+This builds `proxybot` container and uses standard `mongo:latest` container to provide a working MongoDB  connection.
+It is available as ```DB_URI=mongodb://mongodb``` from inside `proxybot` container.
+Refer to `docker-compose.yml` for details.
 
 Finally, register webhook
 ```
@@ -79,5 +84,7 @@ TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
 curl -F "url=${HOST}:8443/bot${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
-It's recommended to set your variables in `.env` file. Check `.env.example` for the list of all accepted vars and their default values.
+It's recommended to set your variables in `.env` file.
+Check `.env.example` for the list of all accepted vars and their default values.
+
 

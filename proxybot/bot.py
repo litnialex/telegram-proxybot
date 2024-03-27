@@ -6,6 +6,7 @@ import traceback
 import inspect
 import html
 import json
+from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from telegram import Bot, Update, ChatMember
 from telegram.ext import filters
@@ -370,7 +371,7 @@ async def telegramma(request):
                     'bot_name': bot.name,
                     'create_agent': 'ad-hoc',
                     'tg_id': int(TELEGRAM_ID),
-                    'stage': 'run',
+                    'create_date': datetime.now().strftime('%Y-%m-%d'),
             }
             db_res = await conf.insert_one(bot_data)
             logging.warning(log_create_new_rec % (bot_id, db_res.acknowledged))

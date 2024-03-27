@@ -1,6 +1,7 @@
 __pycache__/
 .vscode
 .env
+site/
 ssl/
 data/
 tmp/
