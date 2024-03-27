@@ -41,8 +41,8 @@ invalid_cmd_text = (
         "/setnosilent - Undo /setsilent\n"
         "All commands available only to you and groups you add me into."
 )
-setsilent_cmd_text = 'setsilent acknowledge %s. Use /setnosilent to undo.'
-setnosilent_cmd_text = 'setnosilent acknowledge %s. Use /setsilent to undo.'
+setsilent_cmd_text = '/setsilent command acknowledged. /setnosilent to undo.'
+setnosilent_cmd_text = '/setnosilent command acknowledged.'
 
 log_create_new_rec = 'create new DB record for bot %s result: %s'
 log_update_msg = "update ack=%s id=%s: %s"
@@ -58,8 +58,11 @@ logging.basicConfig(
         format='%(asctime)s - %(levelname)s - %(name)s - %(message)s',
         level=logging.INFO if VERBOSE else logging.WARNING,
 )
-logging.getLogger("httpx").setLevel(logging.WARNING)
+if not VERBOSE:
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 logging = logging.getLogger(__name__)
+
+
 def verboselog(text):
     if VERBOSE:
         logging.info(inspect.stack()[1][3] + ': ' + text)
@@ -140,13 +143,13 @@ async def command(update, bot_data):
                 {'_id': bot_data['_id']},
                 {'$set': {'setsilent': True}},
         )
-        return response(chat.id, setsilent_cmd_text % res.acknowledged)
+        return response(chat.id, setsilent_cmd_text)
     elif cmdtext.startswith('/setnosilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
                 {'$unset': {'setsilent': True}},
         )
-        return response(chat.id, setnosilent_cmd_text % res.acknowledged)
+        return response(chat.id, setnosilent_cmd_text)
     else:
         logging.warning(f'invalid: %s' % cmdtext)
         return response(u_id, invalid_cmd_text)

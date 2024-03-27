@@ -2,7 +2,7 @@
 import asyncio
 import functions_framework
 from google.cloud.logging import Client as logClient
-from bot import telegramma
+from .bot import telegramma
 
 @functions_framework.http
 def entrypoint(request):
