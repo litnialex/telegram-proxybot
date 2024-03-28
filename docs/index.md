@@ -1,5 +1,3 @@
-# How it works
-
 Proxybot is a [Telegram](https://www.telegram.org) bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner.
 This group can also be a supergroup with threads (topics).
 
@@ -8,83 +6,45 @@ Of course you can select any message and reply to that specific message.
 
 Sound, video and all other media formats supported by Telegram can be proxied in this manner.
 
-Proxybot provides full privacy for your personal telegram account and allows handling messages in teams. 
+Proxybot provides full privacy for your personal telegram account and allows handling messages in teams.
 
 Check yourself.
 
-# Run proxybot as a service
-Our  [@InitProxybot](https://t.me/InitProxybot) can launch your proxybot in the cloud within seconds.
+## Run proxybot as a service
+Our bot [@InitProxybot](https://t.me/InitProxybot) can launch your proxybot in the cloud within seconds.
 
-This is offered as a service from our team with an annaul subscription fee of just $20.
+This is offered as a service from our team with an annual subscription fee of $20.
 
-Register now and get 4 months for free, no prepay needed!
+You get 4 months for free, prepay is not required.
 
-# Launch by your own
-Proxybot can be launched as a serverless function, as a docker container or as a Flask applicaiton. 
+## Launch by your own
 
-In any of this scenarios you will  need to supply a working MongoDB connection and populate it through `DB_URI` variable. 
-MongoDB is used to store proxybot settings and connections tracking information. 
+Proxybot can be launched as a [serverless function](telegram-bot-serverless.md)  or as a [Flask applicaiton](telegram-bot-Flask.md).
+
+In this case you will need to supply a working MongoDB connection,
+which is used to store proxybot settings and connections tracking information.
 You may start with [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) free tier.
 
-`TELEGRAM_ID` variable should have as value the ID of a Telegram account  assigned "proxybot owner" privilege. 
+`TELEGRAM_ID` variable must contain the ID of the Telegram account  assigned "proxybot owner" privilege.
 If you want to find out your telegram ID ask [@my_id_bot ](https://t.me/my_id_bot)
 
 
-## Launch as a serverless function
-Here is an example how to launch in Google Functions using Google's `gcloud` command:
-```
-TELEGRAM_ID=1234123123
-DB_URI="mongodb+srv://***:**********@cluster0._______.mongodb.net/"
-REGION=europe-west1
-gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
-    --trigger-http --entry-point=entrypoint --allow-unauthenticated \
-	--set-env-vars=TELEGRAM_ID=$TELEGRAM_ID,DB_URI=$DB_URI \
-	--source=proxybot/ proxybot
-```
+## Running multiple bots at once
 
-This command, run from the repository root folder, will upload contents of `proxybot` subfolder into Google Functions with name `proxybot`.
+You can run multiple proxybots with the same `TELEGRAM_ID` and `DB_URI` settings at once for many bots.
+Just repeat the step to register webhook for each of your bots, replacing `TOKEN` with the token of each of the bots you want to run.
 
-Lastly, a `setWebhook` bot API method should be called to start receiving updates from Telegram by serverless function. 
-```
-CLOUD_URL=https://***********.cloudfunctions.net/proxybot
-TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
-```
+## Security considerations
 
-Replace `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` values from these examples with your data.
+Proxybot is designed with respect to your privacy and with security in mind. All messages are proxied in real-time and are not stored in any form. Only minimum required tracking data is stored to reliably provide proxy functionality.
 
-## Launch in Docker
-You can build and launch proxybot as a Docker container.
+`TOKEN` value is not stored anywhere in the database. Proxybot receives it as a part of the webhook URL and uses it while running to make requests to Telegram network.
 
-`HOST` must be a real IP address or a fully qualified domain name of your Docker host.
-```
-HOST=proxybot.example.com
-```
+`TELEGRAM_ID` is used to identify the owner of the bot and is stored in the database. It is used to send notification messages to the owner and to allow the owner to control the bot.
 
-A valid (may be self-signed) SSL certificate is needed for HTTPS.
-In this example we are creating a self-signed certificate valid for 10 years,
-and later it will be used in `setWebhook` method.
-```
-openssl req -newkey rsa:2048 -sha256 -nodes -keyout ssl/privkey.pem -x509 -days 3650 -out ssl/cert.pem -subj "/CN=${HOST}"
-```
+You may also define an API_SECRET variable to protect your bot from unauthorized access. In this case, when registering the webhook, you add ```-F secret_token=${API_SECRET}``` to the curl command.
 
-Run locally `mongodb` and `proxybot` containers
-```
-TELEGRAM_ID=1234123123
-docker compose up
-```
+## Support
 
-This builds `proxybot` container and uses standard `mongo:latest` container to provide a working MongoDB  connection.
-It is available as ```DB_URI=mongodb://mongodb``` from inside `proxybot` container.
-Refer to `docker-compose.yml` for details.
-
-Finally, register webhook
-```
-TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${HOST}:8443/bot${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
-```
-
-It's recommended to set your variables in `.env` file.
-Check `.env.example` for the list of all accepted vars and their default values.
-
+If you have any questions or need help, please contact us in Telegram [@devproxybot](https://t.me/devproxybot)
 

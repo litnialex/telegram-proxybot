@@ -36,11 +36,11 @@ cmd_primary_ok_text = (
 invalid_cmd_text = (
         "Supported commands:\n"
         "/start - Welcome message\n"
-        "/settings - Display current bot's settings\n"
-        "/setprimary - Route messages from new users in current chat\n"
+        "/settings - Display settings\n"
+        "/setprimary - Route messages from new users in this chat\n"
         "/setsilent - Do not display some technical Telegram messages\n"
-        "/setnosilent - Undo /setsilent\n"
-        "All commands available only to you and groups you add me into."
+        "/setnosilent - Undo /setsilent\n\n"
+        "All these commands are available only to you"
 )
 setsilent_cmd_text = '/setsilent command acknowledged. /setnosilent to undo.'
 setnosilent_cmd_text = '/setnosilent command acknowledged.'

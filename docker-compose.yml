@@ -2,7 +2,7 @@ version: '3'
 
 services:
   proxybot:
-    image: proxybot
+    image: proxybot:latest
     build: .
     container_name: proxybot
     hostname: proxybot

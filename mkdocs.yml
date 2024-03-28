@@ -31,5 +31,6 @@ theme:
 
 nav:
   - Home: index.md
-
+  - Run Serverless: telegram-bot-serverless.md
+  - Run as Flask app: telegram-bot-Flask.md
 
