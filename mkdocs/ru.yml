@@ -1,14 +1,14 @@
-site_name: Telegram Proxybot
+site_name: Телеграм Proxybot
 docs_dir: '../docs/ru'
 site_dir: '../site/ru'
-site_description: Telegram bot proxybot
+site_description: Телеграм бот proxybot
 site_url: https://proxybot.dev
 repo_url: https://github.com/litnialex/telegram-proxybot/
 use_directory_urls: false
 nav:
-  - Home: index.md
-  - Run Serverless: Telegram-Bot-Serverless.md
-  - Run as Flask app: Telegram-Bot-Flask.md
+  - Домашняя: index.md
+  - Запуск Serverless: Telegram-Bot-Serverless.md
+  -  Запуск с Flask: Telegram-Bot-Flask.md
 theme:
   name: material
   language: ru
@@ -19,14 +19,14 @@ theme:
     - media: "(prefers-color-scheme)"
       toggle:
         icon: material/link
-        name: Switch to light mode
+        name: Переключить на светлую тему
     - media: "(prefers-color-scheme: light)"
       scheme: default
       primary: indigo
       accent: indigo
       toggle:
         icon: material/toggle-switch
-        name: Switch to dark mode
+        name: Переключить на светлую тему
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
       primary: black
