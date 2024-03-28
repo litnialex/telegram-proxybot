@@ -1,0 +1,44 @@
+site_name: Telegram Proxybot
+docs_dir: '../docs/en'
+site_dir: '../site'
+site_description: Telegram bot proxybot
+site_url: https://proxybot.dev
+repo_url: https://github.com/litnialex/telegram-proxybot/
+use_directory_urls: false
+nav:
+  - Home: index.md
+  - Run Serverless: Telegram-Bot-Serverless.md
+  - Run as Flask app: Telegram-Bot-Flask.md
+theme:
+  name: material
+  language: en
+  plugins:
+    - search
+    - emailprotect
+  palette:
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/link
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off
+        name: Switch to system preference
+extra:
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: Russian
+      link: /ru/
+      lang: ru

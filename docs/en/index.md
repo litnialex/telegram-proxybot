@@ -19,7 +19,7 @@ You get 4 months for free, prepay is not required.
 
 ## Launch by your own
 
-Proxybot can be launched as a [serverless function](telegram-bot-serverless.md)  or as a [Flask applicaiton](telegram-bot-Flask.md).
+Proxybot can be launched as a [serverless function](Telegram-Bot-Serverless.md)  or as a [Flask applicaiton](Telegram-Bot-Flask.md).
 
 In this case you will need to supply a working MongoDB connection,
 which is used to store proxybot settings and connections tracking information.
