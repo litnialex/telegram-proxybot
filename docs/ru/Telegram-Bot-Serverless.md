@@ -9,7 +9,7 @@ gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
     --trigger-http --entry-point=entrypoint --allow-unauthenticated \
 	--set-env-vars=TELEGRAM_ID=$TELEGRAM_ID,DB_URI=$DB_URI \
 	--source=proxybot/ proxybot
-	```
+```
 
 Эта команда, запущенная из корневой папки репозитория, загрузит содержимое подпапки `proxybot` как функцию с именем `proxybot`.
 
