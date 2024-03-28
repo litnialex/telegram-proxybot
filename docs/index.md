@@ -1,6 +1,6 @@
 # How it works
 
-Proxybot is a telegram bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner.
+Proxybot is a [Telegram](https://www.telegram.org) bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner.
 This group can also be a supergroup with threads (topics).
 
 Replies are done simply texting back in the chat. Such messages always go to the last contact in  that chat.
