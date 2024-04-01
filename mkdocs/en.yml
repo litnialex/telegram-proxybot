@@ -12,6 +12,8 @@ nav:
 theme:
   name: material
   language: en
+  logo: logo.png
+  favicon: favicon.ico
   plugins:
     - search
     - emailprotect

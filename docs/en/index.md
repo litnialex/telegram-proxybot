@@ -1,50 +1,43 @@
 Proxybot is a [Telegram](https://www.telegram.org) bot which forwards all incoming messages to the owner or into a telegram group, specified by the owner.
-This group can also be a supergroup with threads (topics).
+This group can also be a supergroup with topics.
 
 Replies are done simply texting back in the chat. Such messages always go to the last contact in  that chat.
-Of course you can select any message and reply to that specific message.
+Of course, you can reply to any specific message in chat history by pressing "Reply" link in that message.
 
-Sound, video and all other media formats supported by Telegram can be proxied in this manner.
+Voice-messages, video-messages, files and any other media format supported by Telegram can be proxied in this manner.
 
-Proxybot provides full privacy for your personal telegram account and allows handling messages in teams.
+*Proxybot assists teams and individuals in managing public communications through their personal Telegram accounts.*
 
-Check yourself.
 
-## Run proxybot as a service
-Our bot [@InitProxybot](https://t.me/InitProxybot) can launch your proxybot in the cloud within seconds.
+## Use proxybot as a service
+This bot: [@InitProxybot](https://t.me/InitProxybot) can launch your proxybot in the cloud within seconds.
 
-This is offered as a service from our team with an annual subscription fee of $20.
+This is offered as a service from proxybot developer with an annual subscription fee of $20.
 
-You get 4 months for free, prepay is not required.
+You get 4 months of free usage, prepay is not required.
+
+*It's extremely easy to start using proxybot.*
+
 
 ## Launch by your own
 
-Proxybot can be launched as a [serverless function](Telegram-Bot-Serverless.md)  or as a [Flask applicaiton](Telegram-Bot-Flask.md).
+Proxybot can be launched as a [serverless function](Telegram-Bot-Serverless.md) or as a [Flask application](Telegram-Bot-Flask.md).
 
-In this case you will need to supply a working MongoDB connection,
-which is used to store proxybot settings and connections tracking information.
+In this case you will need to provide a valid MongoDB connection.
 You may start with [MongoDB Atlas](https://www.mongodb.com/docs/atlas/) free tier.
 
-`TELEGRAM_ID` variable must contain the ID of the Telegram account  assigned "proxybot owner" privilege.
+`TELEGRAM_ID` variable must contain the ID of the Telegram account  assigned "proxybot owner" privilege, and only this account will be able to control bot via commands.
 If you want to find out your telegram ID ask [@my_id_bot ](https://t.me/my_id_bot)
 
 
-## Running multiple bots at once
-
-You can run multiple proxybots with the same `TELEGRAM_ID` and `DB_URI` settings at once for many bots.
-Just repeat the step to register webhook for each of your bots, replacing `TOKEN` with the token of each of the bots you want to run.
-
 ## Security considerations
 
-Proxybot is designed with respect to your privacy and with security in mind. All messages are proxied in real-time and are not stored in any form. Only minimum required tracking data is stored to reliably provide proxy functionality.
+Proxybot is designed with respect to personal privacy and security in mind.
+It is a 100% Open Source software dedicated to the public domain.
 
-`TOKEN` value is not stored anywhere in the database. Proxybot receives it as a part of the webhook URL and uses it while running to make requests to Telegram network.
+`TOKEN` value is not stored anywhere in the database. Proxybot receives it as a part of the webhook URL and uses it only until finishing handling the incoming request.
 
-`TELEGRAM_ID` is used to identify the owner of the bot and is stored in the database. It is used to send notification messages to the owner and to allow the owner to control the bot.
 
-You may also define an API_SECRET variable to protect your bot from unauthorized access. In this case, when registering the webhook, you add ```-F secret_token=${API_SECRET}``` to the curl command.
+## Feedback
 
-## Support
-
-If you have any questions or need help, please contact us in Telegram [@devproxybot](https://t.me/devproxybot)
-
+Contact [@devproxybot](https://t.me/devproxybot) for any questions or feedback.

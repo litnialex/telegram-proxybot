@@ -11,7 +11,7 @@ gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
 	--source=proxybot/ proxybot
 ```
 
-This command, run from the repository root folder, will upload contents of `proxybot` subfolder as a function named `proxybot`.
+This command, run from the [repository][repo] root folder, will upload contents of `proxybot` subfolder as a function named `proxybot`.
 
 
 ## Register the webhook
@@ -26,3 +26,6 @@ curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setW
 Replace `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` variable values with your data.
 
 [cf]: https://cloud.google.com/functions
+[repo]: https://github.com/litnialex/telegram-proxybot
+
+
