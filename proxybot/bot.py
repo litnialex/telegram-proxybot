@@ -357,7 +357,7 @@ async def telegramma(request):
 
         # Get TOKEN from request path
         verboselog(f'JSON: {request.json}')
-        TOKEN = request.path.lstrip('/bot')
+        TOKEN = request.args.get('token') or request.path.lstrip('/bot')
         bot = Bot(TOKEN)
         bot_id = int(TOKEN.split(':')[0])
 
