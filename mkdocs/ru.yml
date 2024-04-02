@@ -41,6 +41,6 @@ extra:
     - name: English
       link: /
       lang: en
-    - name: Russian
+    - name: Русский
       link: /ru/
       lang: ru
