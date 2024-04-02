@@ -1,4 +1,4 @@
-Proxybot — это бот для [Telegram](https://www.telegram.org), который пересылает все входящие сообщения своему владельцу, или в telegram-группу выбранную владельцем.
+Proxybot — это бот для [Телеграм], который пересылает все входящие сообщения своему владельцу, или в telegram-группу выбранную владельцем.
 Такая группа может быть и супергруппой с топиками.
 
 Отправлять ответы через бот можно простой отправкой сообщения в чат.
@@ -11,7 +11,7 @@ Proxybot — это бот для [Telegram](https://www.telegram.org), кото
 
 
 ## Воспользуйтесь нашим сервисом.
-Этот бот: [@InitProxybot](https://t.me/InitProxybot) может запустить ваш proxybot в облаке в считанные секунды.
+Этот бот: [@InitProxybot] может запустить ваш proxybot в облаке в считанные секунды.
 
 Это предлагается в виде сервиса от разработчика proxybot с годовой подпиской в 20 USD.
 
@@ -23,27 +23,39 @@ Proxybot — это бот для [Telegram](https://www.telegram.org), кото
 
 ## Запустите proxybot самостоятельно
 
-Proxybot может быть запущен как [serverless функция](Telegram-Bot-Serverless.md) или как [приложение Flask](Telegram-Bot-Flask.md).
+Proxybot может быть запущен как [serverless функция]
+или как [приложение Flask].
 
 В этом случае вам потребуется предоставить рабочее соединение с MongoDB.
-Как вариант, для этого можно воспользоваться бесплатным предложением от [MongoDB Atlas](https://www.mongodb.com/docs/atlas/).
+Как вариант, для этого можно воспользоваться бесплатным предложением от [MongoDB Atlas].
 
 Переменная `TELEGRAM_ID` должна содержать ID аккаунта Telegram - "владелца proxybot".
-Если вы хотите узнать свой ID в Telegram, спросите у [@my_id_bot](https://t.me/my_id_bot)
+Если вы хотите узнать свой ID в Telegram, спросите у [@my_id_bot].
 
 
 ## Безопасность
 
 Proxybot разработан с уважением к защите персональных данных и вниманием к вопросам безопасности.
 Исходный код бота открыт и бесплатен на 100%.
-Когда вы пользуетесь нашим сервисом для запуска proxybot, мы несём ответственность за выполнение в точности того же когда, что опубликован в [репозитории][repo].
+Когда вы пользуетесь нашим сервисом для запуска proxybot,
+мы несём ответственность за выполнение в точности того же когда,
+что опубликован в [репозитории].
 
-Значение `TOKEN` нигде в базе данных не сохраняется. Proxybot получает его как часть URL в webhook и использует его пока отрабатывает входящий запрос из Telegram.
+Значение `TOKEN` нигде в базе данных не сохраняется.
+Proxybot получает его как часть URL в webhook и использует его
+пока отрабатывает входящий запрос из Telegram.
 
 
 ## Поддержка
 
-Контакт для обратной связи и по любым вопросам - [@devproxybot](https://t.me/devproxybot).
+Контакт для обратной связи и по любым вопросам - [@devproxybot].
 
 
-[repo]: https://github.com/litnialex/telegram-proxybot
+[serverless функция]: Telegram-Bot-Serverless.md
+[приложение Flask]: Telegram-Bot-Flask.md
+[@InitProxybot]: https://t.me/InitProxybot
+[@my_id_bot]: https://t.me/my_id_bot
+[@devproxybot]: https://t.me/devproxybot
+[Телеграм]: https://www.telegram.org
+[MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
+[репозитории]: https://github.com/litnialex/telegram-proxybot

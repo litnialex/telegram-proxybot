@@ -33,8 +33,8 @@ If you want to find out your telegram ID ask [@my_id_bot].
 ## Security considerations
 
 Proxybot is designed with respect to personal privacy and security in mind.
-Source code of the application is 100% open and free.
-When proxybot is used as a service we take the responsability to run exactly the same code, which is published in the [repository].
+The source code of the bot is 100% open and free.
+When you use our service to run proxybot we take the responsability to run exactly the same code, which is published in the [repository].
 
 `TOKEN` value is not stored anywhere in the database. Proxybot receives it as a part of the webhook URL and uses it only until finishing handling the incoming request.
 
