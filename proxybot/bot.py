@@ -188,6 +188,7 @@ async def handle_status(update, bot_data):
 
 
 async def migrate_chat_id(update, bot_data):
+    """Handle migrate_to_chat_id updates"""
     bot_id = bot_data['bot_id']
     old_id = update.message.chat.id
     new_id = update.message.migrate_to_chat_id
@@ -215,8 +216,8 @@ f"{html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
     return response(bot_data['tg_id'], message, parse_mode=ParseMode.HTML)
 
 
-# Send Replies from proxybot owner's chats to telegram users
 async def reply(update, bot_data) -> dict:
+    """Send Replies from proxybot owner's chats to telegram users"""
     def search_by(origin):
         """Search by u_id of original meesage if not hidden, else by name"""
         return (
@@ -242,10 +243,12 @@ async def reply(update, bot_data) -> dict:
 
     # Lookup tracking data
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]
-    track = await tracking.find_one(search)
+    track = tracking.find(search).sort({'timestamp': -1})
+    track = await track.to_list(length=1)
     verboselog(f'lookup {search}": {track}')
 
     if track:
+        track = track[0]
         # unset emoji for last message from this user in background
         unset_emoji_task = asyncio.create_task(
                 unset_emoji(update, track['p_chat'], track['u_last_id'])
@@ -279,8 +282,8 @@ async def reply(update, bot_data) -> dict:
     }
 
 
-# Forward messages from telegram users to proxybot owner's chat
 async def forward(update, bot_data) -> dict:
+    """Forward messages from telegram users to proxybot owner's chat"""
     bot_id = update._bot.token.split(':')[0]
     u_id = update.effective_user.id
     u_chat = update.effective_chat.id
@@ -308,6 +311,7 @@ async def forward(update, bot_data) -> dict:
         update.effective_message.message_id,
         message_thread_id=track['p_thread'] if 'p_thread' in track else None,
     )
+    verboselog(f"forwarded with message id {sent_msg.id}")
 
     # Populate tracking data with current update
     track.update({
@@ -316,6 +320,7 @@ async def forward(update, bot_data) -> dict:
             'u_name': u_name,
             'u_thread': u_thread,
             'u_last_id': sent_msg.id,
+            'timestamp': datetime.now(),
     })
 
     # Update or insert a new tracking record
@@ -357,7 +362,7 @@ async def telegramma(request):
 
         # Get TOKEN from request path
         verboselog(f'JSON: {request.json}')
-        TOKEN = request.args.get('token') or request.path.lstrip('/bot')
+        TOKEN = request.args.get('token') or request.path.lstrip('/')
         bot = Bot(TOKEN)
         bot_id = int(TOKEN.split(':')[0])
 
