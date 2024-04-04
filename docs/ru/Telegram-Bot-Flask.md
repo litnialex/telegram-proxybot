@@ -33,7 +33,7 @@ docker run --rm -p 8080:8080 -p 8443:8443 -v ./ssl:/app/ssl \
 
 
 ## Регистрация вебхука
-Метод API Telegram бота `setWebhook` должен быть вызван для начала получения сообщений от Telegram.
+Метод API Telegram бота [setWebhook] должен быть вызван для начала получения сообщений от Telegram.
 
 ```bash
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
@@ -46,3 +46,4 @@ curl -F "url=${HOST}:8443/bot${TOKEN}" -F certificate=@ssl/cert.pem https://api.
 
 [flask]: https://flask.palletsprojects.com/en/latest/
 [repo]: https://github.com/litnialex/telegram-proxybot
+[setWebhook]: https://core.telegram.org/bots/api#setwebhook

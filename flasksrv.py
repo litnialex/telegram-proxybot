@@ -22,7 +22,7 @@ except FileNotFoundError:
 
 app = Flask(__name__)
 
-@app.route('/', defaults={'token': 'none'}, methods=["POST"])
+@app.route('/bot/<string:token>', methods=["POST"])
 @app.route('/<string:token>', methods=["POST"])
 def proxybot_route(token):
     return asyncio.run(telegramma(request))

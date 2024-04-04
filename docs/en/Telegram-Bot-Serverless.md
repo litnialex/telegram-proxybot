@@ -16,7 +16,7 @@ This command, run from the [repository][repo] root folder, will upload contents 
 
 ## Register the webhook
 
-The Telegram bot API method `setWebhook` must be called to start receiving updates from Telegram.
+The Telegram bot API method [setWebhook] must be called to start receiving updates from Telegram.
 ```
 CLOUD_URL=https://***********.cloudfunctions.net/proxybot
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
@@ -27,5 +27,4 @@ Replace `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` variable values 
 
 [cf]: https://cloud.google.com/functions
 [repo]: https://github.com/litnialex/telegram-proxybot
-
-
+[setWebhook]: https://core.telegram.org/bots/api#setwebhook

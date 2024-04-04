@@ -15,7 +15,7 @@ gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
 
 
 ## Регистрация webhook
-Для начала получения сообщений от Telegram необходимо вызвать Telegram Bot API метод `setWebhook`.
+Для начала получения сообщений от Telegram необходимо вызвать Telegram Bot API метод [setWebhook].
 
 ```
 CLOUD_URL=https://***********.cloudfunctions.net/proxybot
@@ -27,3 +27,4 @@ curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setW
 
 
 [cf]: https://cloud.google.com/functions
+[setWebhook]: https://core.telegram.org/bots/api#setwebhook

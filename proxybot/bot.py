@@ -13,6 +13,7 @@ from telegram.ext import filters
 from telegram.constants import ParseMode, ReactionEmoji
 from pysnooper import snoop
 
+REQUEST_PATH_STRIP = '/bot/'
 DB_URI = os.environ.get('DB_URI')
 VERBOSE = os.environ.get('VERBOSE', False)
 TELEGRAM_ID = os.environ.get('TELEGRAM_ID')
@@ -362,7 +363,8 @@ async def telegramma(request):
 
         # Get TOKEN from request path
         verboselog(f'JSON: {request.json}')
-        TOKEN = request.args.get('token') or request.path.lstrip('/')
+        TOKEN = request.path.lstrip(REQUEST_PATH_STRIP)
+        assert TOKEN, 'TOKEN is empty'
         bot = Bot(TOKEN)
         bot_id = int(TOKEN.split(':')[0])
 
@@ -382,7 +384,7 @@ async def telegramma(request):
             logging.warning(log_create_new_rec % (bot_id, db_res.acknowledged))
         else:
             assert bot_data['tg_id'], f'tg_id for {bot_id} undefined'
-        verboselog(f'bot_data: {bot_data}')
+        verboselog(f'BOT_DATA: {bot_data}')
         tg_id = bot_data['tg_id']
         tg_groups = [i['id'] for i in bot_data.get('groups', [])]
 

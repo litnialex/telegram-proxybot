@@ -41,7 +41,7 @@ docker compose up
 
 ## Register the webhook
 
-The Telegram bot API method `setWebhook` must be called to start receiving updates from Telegram.
+The Telegram bot API method [setWebhook] must be called to start receiving updates from Telegram.
 
 ```bash
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
@@ -57,3 +57,4 @@ Just repeat last step for each of your bots.
 
 [flask]: https://flask.palletsprojects.com/en/latest/
 [repo]: https://github.com/litnialex/telegram-proxybot
+[setWebhook]: https://core.telegram.org/bots/api#setwebhook
