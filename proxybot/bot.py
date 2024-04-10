@@ -19,29 +19,39 @@ TELEGRAM_ID = os.environ.get('TELEGRAM_ID')
 API_SECRET = os.environ.get('API_SECRET')
 REVISION = os.environ.get('K_REVISION', '')
 COMMIT = os.environ.get('COMMIT', '')
-VERSION = f'({COMMIT} {REVISION})' if COMMIT or REVISION else ''
+VERSION = f'proxybot version: {COMMIT} {REVISION}' if COMMIT or REVISION else ''
 
 hello_text = (
-        f"""This is your personal proxybot {VERSION}.\n"""
-        """All messages received by this bot will be forwarded to you.\n"""
-        """Your messages will be sent to the last contact in the chat.\n"""
-        """You can pick any message and press Reply to reply that message.\n"""
-        """Use /help command to check available commands.\n"""
+        """This is your personal proxybot %s.\n"""
+        """You can now share %s with the world!\n"""
+         """All received messaged will be forwarded to you """
+         """and you can easily send your replies back.\n"""
+        """Proxybot homepage is https://proxybot.dev.\n"""
+        """Use /help for built-in commands reference.\n"""
+        f"""{VERSION}"""
+)
+setautoreply_request_text = 'All right, provide your autoreply message now..'
+setautoreply_confirm_text = 'Your autoreply message is now set to:\n%s'
+setautoreply_wrong_type_text = (
+    'Autoreply message must be text. /setautoreply command discarded'
 )
 no_match_text = 'No match for %s lookup, message discarded'
+
 cmd_primary_ok_text = (
         """Done! """
         """From now on messages from new users will land here.\n"""
 )
-invalid_cmd_text = (
+help_text = (
         "Supported commands:\n"
-        "/start - Welcome message\n"
-        "/settings - Display settings\n"
+        "/start - Display welcome message\n"
+        "/settings - Display all settings\n"
+        "/setautoreply - Set your autoreply messages\n"
         "/setprimary - Route messages from new users in this chat\n"
-        "/setsilent - Do not display some technical Telegram messages\n"
+        "/setsilent - Do not display technical Telegram message\n"
         "/setnosilent - Undo /setsilent\n\n"
         "All these commands are available only to you"
 )
+invalid_cmd_text = "Invalid command. /help for help"
 setsilent_cmd_text = '/setsilent command acknowledged. /setnosilent to undo.'
 setnosilent_cmd_text = '/setnosilent command acknowledged.'
 
@@ -82,7 +92,6 @@ def response(u_id, text, thread=None, parse_mode=None) -> dict:
         resp.update({'parse_mode': parse_mode})
     return resp
 
-
 async def error_handler(update, bot_data, error) -> dict:
     """Handle raised exception with notification to proxybot owner"""
     logging.error(f"{error} - {update.to_dict()}", exc_info=error)
@@ -105,14 +114,35 @@ async def unset_emoji(update, chat, m_id):
         logging.error(f"unset reaction {chat} {m_id} - {err}")
 
 
+async def set_autoreply(update, bot_data):
+    conf = AsyncIOMotorClient(DB_URI)['conf']['bots']
+    u_id = update.effective_user.id
+    text = update.message.text
+    if text:
+        bot_data.pop('input_text')
+        bot_data['setautoreply'] = update.message.text
+        await conf.replace_one({'_id': bot_data['_id']}, bot_data)
+        return_text = setautoreply_confirm_text % text
+    else:
+        return_text = setautoreply_wrong_type_text
+    return response(u_id, return_text)
+
+
 async def command(update, bot_data):
     """Handle commands from proxybot owner"""
     conf = AsyncIOMotorClient(DB_URI)['conf']['bots']
     u_id = update.effective_user.id
     chat = update.effective_chat
     cmdtext = update.effective_message.text
+
     if cmdtext.startswith('/start'):
-        return response(u_id, hello_text)
+        await update._bot.initialize()
+        return response(u_id, hello_text % (update._bot.name, update._bot.link))
+
+    elif cmdtext.startswith('/setautoreply'):
+        bot_data.update({'input_text': 'setautoreply'})
+        update_settings = setautoreply_request_text
+
     elif cmdtext.startswith('/settings'):
         bot_data.pop('_id')
         return response(
@@ -120,41 +150,52 @@ async def command(update, bot_data):
                 f'<pre>{html.escape(json.dumps(bot_data, indent=2))}</pre>',
                 parse_mode=ParseMode.HTML,
         )
+
     elif cmdtext.startswith('/setprimary'):
         # Unset setprimary if issued directly into bot's chat
         if chat.id == bot_data['tg_id']:
             if bot_data.get('setprimary'):
                 bot_data.pop('setprimary')
-                update_settings = True
+                update_settings = cmd_primary_ok_text
         # Set setprimary to current chat, only if group in in groups list
         elif chat.id in [i['id'] for i in bot_data.get('groups', [])]:
             if bot_data.get('setprimary') != chat.id:
                 bot_data['setprimary'] = chat.id
-                update_settings =True
+                update_settings = cmd_primary_ok_text
         # Do not allow /setprimary in a random group (or?)
         else:
-            return response(chat.id, 'Not your group')
-        if 'update_settings' in locals():
-            res = await conf.replace_one({'_id': bot_data['_id']}, bot_data)
-            return response(chat.id, cmd_primary_ok_text)
-        else:
+            return response(chat.id, 'This group is not in your groups')
+        if not 'update_settings' in locals():
             return response(chat.id, 'Nothing to change.')
+
     elif cmdtext.startswith('/setsilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
                 {'$set': {'setsilent': True}},
         )
         return response(chat.id, setsilent_cmd_text)
+
     elif cmdtext.startswith('/setnosilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
                 {'$unset': {'setsilent': True}},
         )
         return response(chat.id, setnosilent_cmd_text)
+
+    elif cmdtext.startswith('/help'):
+        return response(u_id, help_text)
+
+    elif cmdtext.startswith('/i'):
+        return {'ok': True, 'description': 'ignore'}
+
     else:
-        logging.warning(f'invalid: %s' % cmdtext)
         return response(u_id, invalid_cmd_text)
 
+    # Update settings if needed
+    if 'update_settings' in locals():
+        verboselog(f'UPDATE BOT_DATA: {bot_data}')
+        res = await conf.replace_one({'_id': bot_data['_id']}, bot_data)
+        return response(chat.id, update_settings)
 
 async def handle_status(update, bot_data):
     """Handle my_chat_member, when bot is added/removed from groups"""
@@ -230,6 +271,15 @@ async def reply(update, bot_data) -> dict:
     p_chat = update.effective_chat.id
     p_thread = message.message_thread_id
     current = {'p_chat': p_chat, 'p_thread': p_thread}
+
+    # Check if it's an input for a command
+    if bot_data.get('input_text') == 'setautoreply':
+        if update.effective_user.id == bot_data['tg_id']:
+            return await set_autoreply(update, bot_data)
+
+    # Ignore text messages (in groups) starting with /i(gnore)
+    if message.text and message.text.startswith('/i'):
+        return {'ok': True, 'description': 'ignore'}
 
     # If Reply contains an original message
     if message.external_reply:
@@ -336,6 +386,10 @@ async def forward(update, bot_data) -> dict:
     if 'unset_emoji_task' in locals():
         await unset_emoji_task
 
+    # Send autoreply to /start message if set
+    if (update.message and update.message.text and
+            update.message.text == '/start' and bot_data.get('setautoreply')):
+        await update._bot.send_message(u_id, bot_data['setautoreply'])
     # Set last message emoji reaction in response
     return {
         'method': 'setMessageReaction',
