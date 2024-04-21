@@ -19,6 +19,12 @@ Proxybot — это бот для [Telegram], который пересылае�
 
 *Начать использовать proxybot проще простого*
 
+<iframe width="315" height="560"
+src="https://www.youtube.com/embed/OgT1-AoHagU"
+title="YouTube video player" frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media;gyroscope;
+picture-in-picture; web-share" allowfullscreen>
+</iframe>
 
 ## Запустите proxybot самостоятельно
 

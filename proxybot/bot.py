@@ -19,14 +19,14 @@ TELEGRAM_ID = os.environ.get('TELEGRAM_ID')
 API_SECRET = os.environ.get('API_SECRET')
 REVISION = os.environ.get('K_REVISION', '')
 COMMIT = os.environ.get('COMMIT', '')
-VERSION = f'proxybot version: {COMMIT} {REVISION}' if COMMIT or REVISION else ''
+VERSION = f'version: {COMMIT} {REVISION}' if COMMIT or REVISION else ''
 
 hello_text = (
         """This is your personal proxybot %s.\n"""
         """You can now share %s with the world!\n"""
          """All received messaged will be forwarded to you """
          """and you can easily send your replies back.\n"""
-        """Proxybot homepage is https://proxybot.dev.\n"""
+        """Homepage: https://proxybot.dev\n"""
         """Use /help for built-in commands reference.\n"""
         f"""{VERSION}"""
 )
@@ -361,7 +361,7 @@ async def forward(update, bot_data) -> dict:
         update.effective_message.message_id,
         message_thread_id=track['p_thread'] if 'p_thread' in track else None,
     )
-    verboselog(f"forwarded with message id {sent_msg.id}")
+    verboselog(f"forwarded as message id {sent_msg.id}")
 
     # Populate tracking data with current update
     track.update({
