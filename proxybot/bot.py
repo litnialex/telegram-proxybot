@@ -339,6 +339,9 @@ async def forward(update, bot_data) -> dict:
     u_chat = update.effective_chat.id
     u_name = update.effective_user.full_name
     u_thread = update.effective_message.message_thread_id
+    jobs = []
+    is_start_msg = (update.message and update.message.text and
+            update.message.text == '/start') or False
 
     # Lookup tracking data by u_id
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]
@@ -347,9 +350,12 @@ async def forward(update, bot_data) -> dict:
 
     # unset emoji for last message from this user in background
     if track and track.get('u_last_id'):
-        unset_emoji_task = asyncio.create_task(
+        jobs.append(asyncio.create_task(
                 unset_emoji(update, track['p_chat'], track['u_last_id'])
-        )
+        ))
+    # Send autoreply to /start message if set
+    if is_start_msg and bot_data.get('setautoreply'):
+        jobs.append(update._bot.send_message(u_id, bot_data['setautoreply']))
     # Forward messages from new users according to bot's settings
     elif not track:
         track = {'p_chat': bot_data.get('setprimary') or bot_data.get('tg_id')}
@@ -382,20 +388,18 @@ async def forward(update, bot_data) -> dict:
         _id = res.inserted_id
     verboselog(f"track {_id} update acknowledged={res.acknowledged}")
 
-    # Wait for unset_emoji_task running in background to complete
-    if 'unset_emoji_task' in locals():
-        await unset_emoji_task
+    # Wait for background tasks to complete
+    await asyncio.gather(*jobs)
 
-    # Send autoreply to /start message if set
-    if (update.message and update.message.text and
-            update.message.text == '/start' and bot_data.get('setautoreply')):
-        await update._bot.send_message(u_id, bot_data['setautoreply'])
     # Set last message emoji reaction in response
     return {
         'method': 'setMessageReaction',
         'chat_id': track['p_chat'],
         'message_id': sent_msg.id,
         'reaction': [{"type":"emoji","emoji":"⚡"}],
+    } if not is_start_msg else {
+        'ok': True,
+        'description': f'{update.update_id}: done',
     }
 
 
