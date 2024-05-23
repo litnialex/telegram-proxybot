@@ -346,19 +346,20 @@ async def forward(update, bot_data) -> dict:
     # Lookup tracking data by u_id
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]
     track = await tracking.find_one({'u_id': u_id})
+    # Forward messages from new users according to bot's settings
+    if not track:
+        track = {'p_chat': bot_data.get('setprimary') or bot_data.get('tg_id')}
     verboselog(f'lookup u_id={u_id}: {track}')
 
-    # unset emoji for last message from this user in background
+    # unset emoji for last message from this user
     if track and track.get('u_last_id'):
         jobs.append(asyncio.create_task(
                 unset_emoji(update, track['p_chat'], track['u_last_id'])
         ))
+
     # Send autoreply to /start message if set
     if is_start_msg and bot_data.get('setautoreply'):
         jobs.append(update._bot.send_message(u_id, bot_data['setautoreply']))
-    # Forward messages from new users according to bot's settings
-    elif not track:
-        track = {'p_chat': bot_data.get('setprimary') or bot_data.get('tg_id')}
 
     # Forward message
     sent_msg = await update._bot.forward_message(
@@ -388,7 +389,7 @@ async def forward(update, bot_data) -> dict:
         _id = res.inserted_id
     verboselog(f"track {_id} update acknowledged={res.acknowledged}")
 
-    # Wait for background tasks to complete
+    # Wait for background jobs to complete
     await asyncio.gather(*jobs)
 
     # Set last message emoji reaction in response
