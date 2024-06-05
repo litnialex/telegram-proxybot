@@ -10,7 +10,7 @@ from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from telegram import Bot, Update, ChatMember
 from telegram.ext import filters
-from telegram.constants import ParseMode, ReactionEmoji
+from telegram.constants import ParseMode
 from pysnooper import snoop
 
 DB_URI = os.environ.get('DB_URI')
@@ -37,7 +37,7 @@ setautoreply_wrong_type_text = (
 )
 no_match_text = 'No match for %s lookup, message discarded'
 
-cmd_primary_ok_text = (
+cmd_default_ok_text = (
         """Done! """
         """From now on messages from new users will land here.\n"""
 )
@@ -46,9 +46,9 @@ help_text = (
         "/start - Display welcome message\n"
         "/settings - Display all settings\n"
         "/setautoreply - Set your autoreply messages\n"
-        "/setprimary - Route messages from new users in this chat\n"
-        "/setsilent - Do not display technical Telegram message\n"
-        "/setnosilent - Undo /setsilent\n\n"
+        "/setdefault - Route messages from new users in this chat\n"
+        "/setsilent - Silently discard technical updates (default)\n"
+        "/setnosilent - Forward technical update messages\n\n"
         "All these commands are available only to you"
 )
 invalid_cmd_text = "Invalid command. /help for help"
@@ -151,20 +151,20 @@ async def command(update, bot_data):
                 parse_mode=ParseMode.HTML,
         )
 
-    elif cmdtext.startswith('/setprimary'):
-        # Unset setprimary if issued directly into bot's chat
+    elif cmdtext.startswith('/setdefault'):
+        # Unset default_group if issued directly into bot's chat
         if chat.id == bot_data['tg_id']:
-            if bot_data.get('setprimary'):
-                bot_data.pop('setprimary')
-                update_settings = cmd_primary_ok_text
-        # Set setprimary to current chat, only if group in in groups list
-        elif chat.id in [i['id'] for i in bot_data.get('groups', [])]:
-            if bot_data.get('setprimary') != chat.id:
-                bot_data['setprimary'] = chat.id
-                update_settings = cmd_primary_ok_text
-        # Do not allow /setprimary in a random group (or?)
+            if bot_data.get('default_group'):
+                bot_data.pop('default_group')
+                update_settings = cmd_default_ok_text
+        # Check if group in in tg_groups list
+        elif str(chat.id) in bot_data.get('tg_groups', {}):
+            if bot_data.get('default_group') != chat.id:
+                bot_data['default_group'] = chat.id
+                update_settings = cmd_default_ok_text
+        # Do not allow /setdefault in a random group (or?)
         else:
-            return response(chat.id, 'This group is not in your groups')
+            return response(chat.id, 'This group is not among your groups')
         if not 'update_settings' in locals():
             return response(chat.id, 'Nothing to change.')
 
@@ -203,26 +203,26 @@ async def handle_status(update, bot_data):
     if not (update.effective_user.id == bot_data['tg_id'] or
             update.effective_user.username == 'GroupAnonymousBot'):
         return await discard(update, bot_data)
-    groups = bot_data.get('groups', [])
-    group = update.effective_chat.to_dict()
+    tg_groups = bot_data.get('tg_groups', {})
+    chat_id = str(update.effective_chat.id)
     new_status = update.my_chat_member.new_chat_member.status
-    logging.info(log_status_msg % (new_status, group))
+    logging.info(log_status_msg % (new_status, chat_id))
 
-    if new_status == ChatMember.MEMBER and group not in groups:
-        groups.append(group)
-    elif new_status == ChatMember.LEFT and group in groups:
-        groups.remove(group)
+    if new_status == ChatMember.MEMBER and chat_id not in tg_groups:
+        tg_groups.update({chat_id: update.effective_chat.type})
+    elif new_status == ChatMember.LEFT and chat_id in tg_groups:
+        tg_groups.pop(chat_id)
     else:
         verboselog('no settings update needed')
         return {'ok': True, 'description': 'no settings update needed'}
 
     conf = AsyncIOMotorClient(DB_URI)['conf']['bots']
-    bot_data.update({'groups': groups})
+    bot_data.update({'tg_groups': tg_groups})
     res = await conf.replace_one({'_id': bot_data['_id']}, bot_data)
     verboselog(log_update_msg % (
             res.acknowledged,
             bot_data['_id'],
-            f'groups={groups}',
+            f'tg_groups={tg_groups}',
             )
     )
     return {'ok': True, 'description': 'settings updated'}
@@ -250,7 +250,7 @@ async def discard(update, bot_data):
     if bot_data.get('setsilent') == True:
         return {'ok': True, 'description': f'{update.update_id}: discard'}
     message = (
-"Ignoring received message.\nUse /setsilent command to mute.\n\n<pre>"
+"Ignoring received update.\nUse /setsilent command to mute.\n\n<pre>"
 f"{html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
 "</pre>"
     )
@@ -346,12 +346,33 @@ async def forward(update, bot_data) -> dict:
     is_start_msg = (update.message and update.message.text and
             update.message.text == '/start') or False
 
-    # Lookup tracking data by u_id
+    # Lookup tracking data by u_id and u_chat
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]
-    track = await tracking.find_one({'u_id': u_id})
-    # Forward messages from new users according to bot's settings
+    track = await tracking.find_one({'u_id': u_id, 'u_chat': u_chat})
+
+    # Lookup for track by u_chat only
     if not track:
-        track = {'p_chat': bot_data.get('setprimary') or bot_data.get('tg_id')}
+        groupchat = await tracking.find_one({'u_chat': u_chat})
+        if groupchat:
+            track = {'p_chat': groupchat.get('p_chat'),
+                     'p_thread': groupchat.get('p_thread')}
+
+    # Well, let's create a new track
+    if not track:
+        if bot_data.get('default_group'):
+            track = {'p_chat': bot_data['default_group']}
+            group_type = bot_data['tg_groups'][str(track['p_chat'])]
+            # Create new topic in a supergroup
+            if group_type == "supergroup":
+                topic_name = update.effective_chat.title or u_name
+                topic_created = await update._bot.create_forum_topic(
+                        bot_data['default_group'],
+                        topic_name,
+                )
+                track.update({'p_thread': topic_created.message_thread_id})
+        else:
+            track = {'p_chat': bot_data.get('tg_id')}
+
     verboselog(f'lookup u_id={u_id}: {track}')
 
     # unset emoji for last message from this user
@@ -379,7 +400,7 @@ async def forward(update, bot_data) -> dict:
             'u_chat': u_chat,
             'u_name': u_name,
             'u_thread': u_thread,
-            'u_last_id': sent_msg.id,
+            'u_last_id': sent_msg.id if track['p_chat']> 0 else None,
             'timestamp': datetime.now(),
     })
 
@@ -401,7 +422,7 @@ async def forward(update, bot_data) -> dict:
         'chat_id': track['p_chat'],
         'message_id': sent_msg.id,
         'reaction': [{"type":"emoji","emoji":"⚡"}],
-    } if not is_start_msg else {
+    } if track['p_chat'] > 0 and not is_start_msg else {
         'ok': True,
         'description': f'{update.update_id}: done',
     }
@@ -445,9 +466,8 @@ async def telegramma(request):
             logging.warning(log_create_new_rec % (bot_id, db_res.acknowledged))
         else:
             assert bot_data['tg_id'], f'tg_id for {bot_id} undefined'
-        verboselog(f'BOT_DATA: {bot_data}')
         tg_id = bot_data['tg_id']
-        tg_groups = [i['id'] for i in bot_data.get('groups', [])]
+        tg_groups = bot_data.get('tg_groups', {}).keys()
 
         # Create update object from JSON data
         update = Update.de_json(data=request.json, bot=bot)
@@ -483,7 +503,7 @@ async def telegramma(request):
             logging.info(f'discard non-message update - {update.to_dict()}')
             dispatch = discard
         # reply() function handles messages from proxybot owner and his groups
-        elif (u_id == tg_id or update.effective_chat.id in tg_groups):
+        elif (u_id == tg_id or str(update.effective_chat.id) in tg_groups):
             dispatch = reply
         # All the rest is forwarded to proxybot owner (owner's group)
         else:
