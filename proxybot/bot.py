@@ -47,13 +47,15 @@ help_text = (
         "/settings - Display all settings\n"
         "/setautoreply - Set your autoreply messages\n"
         "/setdefault - Route messages from new users in this chat\n"
-        "/setsilent - Silently discard technical updates (default)\n"
-        "/setnosilent - Forward technical update messages\n\n"
+        "/setsilent - Silently discard ignored updates (default)\n"
+        "/setnosilent - Forward discarded updates to you\n"
+        "/del - Delete current topic from supergroup\n\n"
         "All these commands are available only to you"
 )
 invalid_cmd_text = "Invalid command. /help for help"
 setsilent_cmd_text = '/setsilent command acknowledged. /setnosilent to undo.'
 setnosilent_cmd_text = '/setnosilent command acknowledged.'
+del_cmd_text = 'Deleted thread_id %s from %s and removed %s tracks from DB'
 
 log_create_new_rec = 'create new DB record for bot %s result: %s'
 log_update_msg = "update ack=%s id=%s: %s"
@@ -101,7 +103,7 @@ async def error_handler(update, bot_data, error) -> dict:
 "An exception was raised while handling a message\n"
 f"<pre>{html.escape(tb_string)}</pre>\n<pre>"
 f"{html.escape(json.dumps(update.to_dict(), indent=2, ensure_ascii=False))}"
-f"</pre>\n\n<pre>bot_data = {html.escape(str(bot_data))}</pre>"
+"</pre>\n"
     )
     return response(bot_data['tg_id'], message, parse_mode=ParseMode.HTML)
 
@@ -171,16 +173,31 @@ async def command(update, bot_data):
     elif cmdtext.startswith('/setsilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
-                {'$set': {'setsilent': True}},
+                {'$set': {'silent': True}},
         )
         return response(chat.id, setsilent_cmd_text)
 
     elif cmdtext.startswith('/setnosilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
-                {'$unset': {'setsilent': True}},
+                {'$set': {'silent': False}},
         )
         return response(chat.id, setnosilent_cmd_text)
+
+    elif cmdtext.startswith('/del'):
+        thread_id = update.effective_message.message_thread_id
+        if not thread_id:
+            return response(chat.id, "This is not a topic in a supergroup")
+        bot_id = bot_data['bot_id']
+        tracking = AsyncIOMotorClient(DB_URI)['tracking'][f"bot{bot_id}"]
+        await update._bot.delete_forum_topic(chat.id, thread_id)
+        db_res = await tracking.delete_many({
+                'p_chat': chat.id,
+                'p_thread': thread_id,
+        })
+        title = update.effective_chat.title
+        notify_text = del_cmd_text % (thread_id, title, db_res.deleted_count)
+        return response(bot_data['tg_id'], notify_text)
 
     elif cmdtext.startswith('/help'):
         return response(u_id, help_text)
@@ -208,19 +225,31 @@ async def handle_status(update, bot_data):
     new_status = update.my_chat_member.new_chat_member.status
     logging.info(log_status_msg % (new_status, chat_id))
 
-    if new_status == ChatMember.MEMBER and chat_id not in tg_groups:
+    if new_status == ChatMember.MEMBER:
         tg_groups.update({chat_id: update.effective_chat.type})
-    elif new_status == ChatMember.LEFT and chat_id in tg_groups:
-        tg_groups.pop(chat_id)
+    elif new_status == ChatMember.LEFT:
+        collection = 'bot'+str(bot_data['bot_id'])
+        tracking = AsyncIOMotorClient(DB_URI)['tracking'][collection]
+        if chat_id in tg_groups:
+            tg_groups.pop(chat_id)
+        if bot_data.get('default_group') == update.effective_chat.id:
+            bot_data.pop('default_group')
+        db_res = await tracking.delete_many({
+                'p_chat': update.effective_chat.id,
+        })
+        logging.warning(f'Flushed {db_res.deleted_count} tracking records')
     else:
         verboselog('no settings update needed')
         return {'ok': True, 'description': 'no settings update needed'}
 
     conf = AsyncIOMotorClient(DB_URI)['conf']['bots']
     bot_data.update({'tg_groups': tg_groups})
-    res = await conf.replace_one({'_id': bot_data['_id']}, bot_data)
+    db_res = await conf.replace_one(
+            {'_id': bot_data['_id']},
+            bot_data
+    )
     verboselog(log_update_msg % (
-            res.acknowledged,
+            db_res.acknowledged,
             bot_data['_id'],
             f'tg_groups={tg_groups}',
             )
@@ -350,18 +379,17 @@ async def forward(update, bot_data) -> dict:
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]
     track = await tracking.find_one({'u_id': u_id, 'u_chat': u_chat})
 
-    # Lookup for track by u_chat only
+    # Well, let's create a new track
     if not track:
         groupchat = await tracking.find_one({'u_chat': u_chat})
+        # Use same route for same (group)chat
         if groupchat:
             track = {'p_chat': groupchat.get('p_chat'),
                      'p_thread': groupchat.get('p_thread')}
-
-    # Well, let's create a new track
     if not track:
         if bot_data.get('default_group'):
             track = {'p_chat': bot_data['default_group']}
-            group_type = bot_data['tg_groups'][str(track['p_chat'])]
+            group_type = bot_data['tg_groups'].get(str(track['p_chat']))
             # Create new topic in a supergroup
             if group_type == "supergroup":
                 topic_name = update.effective_chat.title or u_name
@@ -373,7 +401,7 @@ async def forward(update, bot_data) -> dict:
         else:
             track = {'p_chat': bot_data.get('tg_id')}
 
-    verboselog(f'lookup u_id={u_id}: {track}')
+    verboselog(f'lookup u_id={u_id} u_chat={u_chat}: {track}')
 
     # unset emoji for last message from this user
     if track and track.get('u_last_id'):
@@ -386,12 +414,22 @@ async def forward(update, bot_data) -> dict:
         jobs.append(update._bot.send_message(u_id, bot_data['setautoreply']))
 
     # Forward message
-    sent_msg = await update._bot.forward_message(
-        track['p_chat'],
-        u_chat,
-        update.effective_message.message_id,
-        message_thread_id=track['p_thread'] if 'p_thread' in track else None,
-    )
+    try:
+        sent_msg = await update._bot.forward_message(
+            track['p_chat'],
+            u_chat,
+            update.effective_message.message_id,
+            message_thread_id=track.get('p_thread'),
+        )
+    except Exception as err:
+        if 'Message thread not found' in str(err) or 'Forbidden' in str(err):
+            db_res = await tracking.delete_many({
+                    'p_chat': track['p_chat'],
+                    'p_thread': track.get('p_thread'),
+            })
+            logging.info(f'Flushed {db_res.deleted_count} tracking records')
+        raise err
+
     verboselog(f"forwarded as message id {sent_msg.id}")
 
     # Populate tracking data with current update
@@ -494,11 +532,11 @@ async def telegramma(request):
         # Handle migrate_to_chat_id (group to supergroup with ID change)
         elif update.message and update.message.migrate_to_chat_id:
             dispatch = migrate_chat_id
-        # Discard (with notify) all other status change messages
+        # Discard all other status change messages
         elif filters.StatusUpdate.ALL.check_update(update):
             logging.info(f'discard status update - {update.to_dict()}')
             dispatch = discard
-        # Discard (with notify) all updates without message (like message_reaction)
+        # Discard all updates without message (like message_reaction)
         elif not update.effective_message:
             logging.info(f'discard non-message update - {update.to_dict()}')
             dispatch = discard
