@@ -329,9 +329,10 @@ async def reply(update, bot_data) -> dict:
     if track:
         track = track[0]
         # unset emoji for last message from this user in background
-        unset_emoji_task = asyncio.create_task(
+        if track.get('u_last_id'):
+            unset_emoji_task = asyncio.create_task(
                 unset_emoji(update, track['p_chat'], track['u_last_id'])
-        )
+            )
         # update timestamp when msg is explicit "Reply to"
         if 'u_id' or 'u_name' in search:
             current.update({'timestamp': datetime.now()})
