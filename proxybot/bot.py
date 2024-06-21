@@ -47,15 +47,18 @@ help_text = (
         "/settings - Display all settings\n"
         "/setautoreply - Set your autoreply messages\n"
         "/setdefault - Route messages from new users in this chat\n"
-        "/setsilent - Silently discard ignored updates (default)\n"
-        "/setnosilent - Forward discarded updates to you\n"
-        "/del - Delete current topic from supergroup\n\n"
+        "/setsilent - Undo /setnosilent command\n"
+        "/setnosilent - Do not discard ignored updates\n"
+        "/del - Delete current topic from supergroup\n"
+        "/ban - Prohibit futher messages from this user\n"
+        "/unban - Undo /ban command\n\n"
         "All these commands are available only to you"
 )
 invalid_cmd_text = "Invalid command. /help for help"
-setsilent_cmd_text = '/setsilent command acknowledged. /setnosilent to undo.'
-setnosilent_cmd_text = '/setnosilent command acknowledged.'
+cmd_acknowledged_text = '%s command acknowledged'
 del_cmd_text = 'Deleted thread_id %s from %s and removed %s tracks from DB'
+setdefault_not_allowed_text = """Not allowed in this group,
+probably because the bot was added here by someone else, not by you"""
 
 log_create_new_rec = 'create new DB record for bot %s result: %s'
 log_update_msg = "update ack=%s id=%s: %s"
@@ -133,13 +136,18 @@ async def set_autoreply(update, bot_data):
 async def command(update, bot_data):
     """Handle commands from proxybot owner"""
     conf = AsyncIOMotorClient(DB_URI)['conf']['bots']
-    u_id = update.effective_user.id
-    chat = update.effective_chat
+    bot_id = bot_data['bot_id']
+    p_chat = update.effective_chat.id
+    p_thread = update.effective_message.message_thread_id
     cmdtext = update.effective_message.text
 
     if cmdtext.startswith('/start'):
         await update._bot.initialize()
-        return response(u_id, hello_text % (update._bot.name, update._bot.link))
+        return response(
+                p_chat,
+                hello_text % (update._bot.name, update._bot.link),
+                p_thread,
+        )
 
     elif cmdtext.startswith('/setautoreply'):
         bot_data.update({'input_text': 'setautoreply'})
@@ -148,71 +156,73 @@ async def command(update, bot_data):
     elif cmdtext.startswith('/settings'):
         bot_data.pop('_id')
         return response(
-                chat.id,
+                p_chat,
                 f'<pre>{html.escape(json.dumps(bot_data, indent=2))}</pre>',
+                thread=p_thread,
                 parse_mode=ParseMode.HTML,
         )
 
     elif cmdtext.startswith('/setdefault'):
         # Unset default_group if issued directly into bot's chat
-        if chat.id == bot_data['tg_id']:
+        if p_chat == bot_data['tg_id']:
             if bot_data.get('default_group'):
                 bot_data.pop('default_group')
                 update_settings = cmd_default_ok_text
         # Check if group in in tg_groups list
-        elif str(chat.id) in bot_data.get('tg_groups', {}):
-            if bot_data.get('default_group') != chat.id:
-                bot_data['default_group'] = chat.id
+        elif str(p_chat) in bot_data.get('tg_groups', {}):
+            if bot_data.get('default_group') != p_chat:
+                bot_data['default_group'] = p_chat
                 update_settings = cmd_default_ok_text
-        # Do not allow /setdefault in a random group (or?)
+        # Not allowed in a group where the bot was added by someone else
         else:
-            return response(chat.id, 'This group is not among your groups')
+            return response(p_chat, setdefault_not_allowed_text, p_thread)
         if not 'update_settings' in locals():
-            return response(chat.id, 'Nothing to change.')
+            return response(p_chat, 'Nothing to change.', p_thread)
 
     elif cmdtext.startswith('/setsilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
                 {'$set': {'silent': True}},
         )
-        return response(chat.id, setsilent_cmd_text)
+        return response(p_chat, cmd_acknowledged_text % cmdtext, p_thread)
 
     elif cmdtext.startswith('/setnosilent'):
         res = await conf.update_one(
                 {'_id': bot_data['_id']},
                 {'$set': {'silent': False}},
         )
-        return response(chat.id, setnosilent_cmd_text)
+        return response(p_chat, cmd_acknowledged_text % cmdtext, p_thread)
 
     elif cmdtext.startswith('/del'):
-        thread_id = update.effective_message.message_thread_id
-        if not thread_id:
-            return response(chat.id, "This is not a topic in a supergroup")
-        bot_id = bot_data['bot_id']
+        if not p_thread:
+            return response(p_chat, "This is not a topic in a supergroup")
         tracking = AsyncIOMotorClient(DB_URI)['tracking'][f"bot{bot_id}"]
-        await update._bot.delete_forum_topic(chat.id, thread_id)
+        await update._bot.delete_forum_topic(p_chat, p_thread)
         db_res = await tracking.delete_many({
-                'p_chat': chat.id,
-                'p_thread': thread_id,
+                'p_chat': p_chat,
+                'p_thread': p_thread,
         })
         title = update.effective_chat.title
-        notify_text = del_cmd_text % (thread_id, title, db_res.deleted_count)
-        return response(bot_data['tg_id'], notify_text)
+        notify_text = del_cmd_text % (p_thread, title, db_res.deleted_count)
+        return response(p_chat, notify_text)
+
+    elif cmdtext in ['/ban', '/unban']:
+        return await reply(update, bot_data)
 
     elif cmdtext.startswith('/help'):
-        return response(u_id, help_text)
+        return response(p_chat, help_text, p_thread)
 
     elif cmdtext.startswith('/i'):
         return {'ok': True, 'description': 'ignore'}
 
     else:
-        return response(u_id, invalid_cmd_text)
+        return response(p_chat, invalid_cmd_text, p_thread)
 
     # Update settings if needed
     if 'update_settings' in locals():
         verboselog(f'UPDATE BOT_DATA: {bot_data}')
         res = await conf.replace_one({'_id': bot_data['_id']}, bot_data)
-        return response(chat.id, update_settings)
+        return response(p_chat, update_settings, p_thread)
 
 async def handle_status(update, bot_data):
     """Handle my_chat_member, when bot is added/removed from groups"""
@@ -341,6 +351,19 @@ async def reply(update, bot_data) -> dict:
             track.update(current)
             res = await tracking.replace_one({'_id': track['_id']}, track)
             verboselog(log_update_msg % (res.acknowledged, track['_id'], current))
+        # handle /ban and /unban commands
+        if message.text and message.text in ['/ban', '/unban']:
+            db_op = {'/ban': '$set', '/unban': '$unset'}[message.text]
+            await tracking.update_many(
+                {'u_chat': track['u_chat']},
+                {db_op: {'ban': True}},
+            )
+            return response(
+                    p_chat,
+                    f"ACK {message['text']} u_chat {track['u_chat']}",
+                    p_thread,
+            )
+
     # No track, but we have u_id in original message. Create a new track record
     elif 'u_id' in search:
         track = search
@@ -386,7 +409,8 @@ async def forward(update, bot_data) -> dict:
         # Use same route for same (group)chat
         if groupchat:
             track = {'p_chat': groupchat.get('p_chat'),
-                     'p_thread': groupchat.get('p_thread')}
+                     'p_thread': groupchat.get('p_thread'),
+                     'ban': groupchat.get('ban')}
     if not track:
         if bot_data.get('default_group'):
             track = {'p_chat': bot_data['default_group']}
@@ -404,8 +428,12 @@ async def forward(update, bot_data) -> dict:
 
     verboselog(f'lookup u_id={u_id} u_chat={u_chat}: {track}')
 
+    # check for ban
+    if track.get('ban') == True:
+        return {'ok': True, 'description': f'{update.update_id} ban - ingore'}
+
     # unset emoji for last message from this user
-    if track and track.get('u_last_id'):
+    if track.get('u_last_id'):
         jobs.append(asyncio.create_task(
                 unset_emoji(update, track['p_chat'], track['u_last_id'])
         ))
