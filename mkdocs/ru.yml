@@ -6,7 +6,7 @@ site_url: https://proxybot.dev
 repo_url: https://github.com/litnialex/telegram-proxybot/
 use_directory_urls: false
 nav:
-  - Домашняя: index.md
+  - Proxybot - Главная: index.md
   - Запуск Serverless: Telegram-Bot-Serverless.md
   -  Запуск с Flask: Telegram-Bot-Flask.md
 theme:

@@ -1,17 +1,32 @@
-Proxybot is a [Telegram] bot which forwards all incoming messages to the owner
-or into a telegram group, specified by the owner.
-This group can also be a supergroup with topics.
+***Proxybot assists teams and individuals to manage securely customer communications from their personal Telegram apps.***
 
-Replies are done simply texting back in the chat.
-Such messages always go to the last contact in  that chat.
-Of course, you can reply to any specific message in chat history
-by pressing "Reply" link in that message.
+This **Proxybot** is a [Telegram] bot designed to forward all incoming messages to its owner. Proxybot enables it's owner to:
 
-Voice-messages, video-messages, files and any other media format
-supported by Telegram can be proxied in this manner.
+ * **Receive all incoming messages**: When the bot's username is published, any messages sent to the bot are forwarded to the owner.
+ * **Reply to messages on behalf of the bot**: The bot's owner can reply back to customers directly in the chat with the bot.
 
-*Proxybot assists teams and individuals in managing public communications through their personal Telegram accounts.*
+<img style="max-height:550px;" src="demo1.gif" />
 
+Messages to the chat with bot always go to the last contact.
+To reply to a specific message from the chat history, simply select the message and press "Reply" as demonstrated above.
+Bot marks with ⚡️ symbol last unreplied message from each customer.
+
+Also a good way to organize clients communications is by creating a **supergroup with topics** and setting it as a default place to receive messages. Proxybot will then automatically create an individual topic for every new contact. Here is how it looks like:
+
+<img style="max-height:550px;" src="demo2.gif" />
+
+To reapeat this you will need:
+
+ 1. Create a group
+ 1. Enable topics in group's settings (making it a supergroup)
+ 1. Add the bot to the group
+ 1. Promote bot to admin with "Мanage topics" and "Delete messages" privileges
+ 1. Issue `/setdefault` command in General topic of the supergroup
+ 1. (Optional) add more members to the group. Any member of the group can make replies in the same way as the bot owner does.
+
+
+**Voice** messages, **video** messages, **files** and any other media-format
+supported by the Telegram can be proxied in this manner.
 
 ## Use proxybot as a service
 This bot: [@InitProxybot] can launch your proxybot in the cloud within seconds.
