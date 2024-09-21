@@ -20,7 +20,7 @@ gcloud functions deploy --gen2 --region=$REGION --runtime=python310 \
 ```
 CLOUD_URL=https://***********.cloudfunctions.net/proxybot
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
+curl -F "url=${CLOUD_URL}/${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
 Замените значения переменных `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` на ваши данные.

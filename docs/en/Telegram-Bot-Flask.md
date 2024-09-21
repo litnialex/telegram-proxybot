@@ -45,7 +45,7 @@ The Telegram bot API method [setWebhook] must be called to start receiving updat
 
 ```bash
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${HOST}:8443/bot${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
+curl -F "url=${HOST}:8443/${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
 Additionally, you may define an API_SECRET variable to prevent unauthorized webhook calls.

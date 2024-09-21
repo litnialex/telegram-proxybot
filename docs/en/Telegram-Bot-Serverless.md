@@ -20,7 +20,7 @@ The Telegram bot API method [setWebhook] must be called to start receiving updat
 ```
 CLOUD_URL=https://***********.cloudfunctions.net/proxybot
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${CLOUD_URL}/bot${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
+curl -F "url=${CLOUD_URL}/${TOKEN}" https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
 Replace `TELEGRAM_ID`, `DB_URI`, `REGION`, `CLOUD_URL`, `TOKEN` variable values with your data.

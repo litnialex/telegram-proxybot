@@ -37,7 +37,7 @@ docker run --rm -p 8080:8080 -p 8443:8443 -v ./ssl:/app/ssl \
 
 ```bash
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${HOST}:8443/bot${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
+curl -F "url=${HOST}:8443/${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
 Можно дополнительно задать переменную API_SECRET и укзать её в webhook. Для этого команде `curl` добавляется опция ```-F secret_token=${API_SECRET}```. Тогда неавторизованные запросы будут игнорироваться.
