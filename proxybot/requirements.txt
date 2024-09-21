@@ -1,5 +1,5 @@
 functions-framework==3.*
 google-cloud-logging
 python-telegram-bot~=20.8
-motor~=3.3.2
+motor>=3.6
 PySnooper~=1.2.0
