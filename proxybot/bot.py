@@ -397,7 +397,7 @@ async def forward(update, bot_data) -> dict:
     u_thread = update.effective_message.message_thread_id
     jobs = []
     is_start_msg = (update.message and update.message.text and
-            update.message.text == '/start') or False
+            update.message.text.startswith('/start')) or False
 
     # Lookup tracking data by u_id and u_chat
     tracking = AsyncIOMotorClient(DB_URI)['tracking']['bot'+bot_id]

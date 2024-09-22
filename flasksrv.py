@@ -8,7 +8,7 @@ FLASK_APP_PORT = os.environ.get('FLASK_APP_PORT', 8080)
 FLASK_SSL_PORT = os.environ.get('FLASK_SSL_PORT', 8443)
 FLASK_SSL_CERT = os.environ.get('FLASK_SSL_CERT', 'ssl/cert.pem')
 FLASK_SSL_KEY = os.environ.get('FLASK_SSL_KEY', 'ssl/privkey.pem')
-FLASK_DEBUG = os.environ.get('FLASK_DEBUG', True)
+FLASK_DEBUG = os.environ.get('FLASK_DEBUG', False)
 
 # Enable SSL if certificate and key available
 app_dir = os.path.dirname(os.path.abspath(__file__))
