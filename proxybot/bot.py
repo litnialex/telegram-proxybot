@@ -442,6 +442,14 @@ async def forward(update, bot_data) -> dict:
     if is_start_msg and bot_data.get('setautoreply'):
         jobs.append(update._bot.send_message(u_id, bot_data['setautoreply']))
 
+    # Pass start argument, example: https://t.me/example_bot?start=from_source
+    if is_start_msg and len(update.message.text) > 7:
+        jobs.append(update._bot.send_message(
+            track['p_chat'],
+            update.message.text[7:],
+            message_thread_id=track.get('p_thread'),
+        ))
+
     # Forward message
     try:
         sent_msg = await update._bot.forward_message(
