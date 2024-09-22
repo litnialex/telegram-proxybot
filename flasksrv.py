@@ -2,7 +2,6 @@
 import os
 import asyncio
 from flask import Flask, request
-from proxybot.bot import telegramma
 
 FLASK_APP_PORT = os.environ.get('FLASK_APP_PORT', 8080)
 FLASK_SSL_PORT = os.environ.get('FLASK_SSL_PORT', 8443)
@@ -26,6 +25,7 @@ app = Flask(__name__)
 @app.route('/', defaults={'token': ''}, methods=["POST"])
 @app.route('/<string:token>', methods=["POST"])
 def proxybot_route(token):
+    from proxybot.bot import telegramma
     return asyncio.run(telegramma(request))
 
 

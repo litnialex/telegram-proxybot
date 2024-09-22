@@ -7,7 +7,8 @@ and later it will be used in `setWebhook` method.
 
 ```bash
 HOST=proxybot.example.com
-openssl req -newkey rsa:2048 -sha256 -nodes -keyout ssl/privkey.pem -x509 -days 3650 -out ssl/cert.pem -subj "/CN=${HOST}"
+openssl req -newkey rsa:2048 -sha256 -nodes -keyout ssl/privkey.pem \
+  -x509 -days 3650 -out ssl/cert.pem -subj "/CN=${HOST}"
 ```
 
 `HOST` variable must contain a real IP address or a fully qualified domain name for reaching the application from Telegram network.
@@ -23,13 +24,15 @@ This command will launch pre-built proxybot docker container.
 TELEGRAM_ID=1234123123
 DB_URI="mongodb+srv://***:**********@cluster0._______.mongodb.net/"
 docker run --rm -p 8080:8080 -p 8443:8443 -v ./ssl:/app/ssl \
-  -e TELEGRAM_ID=$TELEGRAM_ID -e DB_URI=$DB_URI litnialex/proxybot
+  -e TELEGRAM_ID=$TELEGRAM_ID -e DB_URI=$DB_URI -e VERBOSE=yes \
+  litnialex/proxybot
 ```
 
 
 ## Run with Docker Compose
 
-You may choose to build `proxybot` container locally, as well as to start a standard `mongodb` container and set `DB_URI=mongodb://mongodb`. Check `docker-compose.yml` in [repository][repo] root folder for details.
+You may choose to build `proxybot` container locally, as well as to start a standard `mongodb` container and set `DB_URI=mongodb://mongodb`.
+Check `docker-compose.yml` in [repository][repo] root folder for details.
 
 Provide your variables in `.env` file.
 Check `.env.example` for the list of all accepted vars and their default values.
@@ -45,7 +48,8 @@ The Telegram bot API method [setWebhook] must be called to start receiving updat
 
 ```bash
 TOKEN=123456789:NeotobrAfMymceuwackTeunLiudsudjocoi
-curl -F "url=${HOST}:8443/${TOKEN}" -F certificate=@ssl/cert.pem https://api.telegram.org/bot${TOKEN}/setWebhook
+curl -F "url=${HOST}:8443/${TOKEN}" -F certificate=@ssl/cert.pem \
+  https://api.telegram.org/bot${TOKEN}/setWebhook
 ```
 
 Additionally, you may define an API_SECRET variable to prevent unauthorized webhook calls.
