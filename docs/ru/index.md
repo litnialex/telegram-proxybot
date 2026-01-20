@@ -31,24 +31,7 @@ Cимволом ⚡️ отмечается последнее неотвече�
 **Голосовые** и **видео** сообщения, **файлы** и любой другой медиа-формат, поддерживаемый Telegram, может быть переслан proxybot'ом таким образом.
 
 
-## Воспользуйтесь нашим сервисом.
-Этот бот: [@InitProxybot] может запустить ваш proxybot в облаке в считанные секунды.
-
-Это предлагается в виде сервиса от разработчика proxybot с годовой подпиской стоимостью 20 USD.
-
-Вы получаете 4 месяца бесплатного использования proxybot,
-предоплата не требуется.
-
-*Начать использовать proxybot проще простого*
-
-<iframe width="315" height="560"
-src="https://www.youtube.com/embed/OgT1-AoHagU"
-title="YouTube video player" frameborder="0"
-allow="accelerometer; autoplay; clipboard-write; encrypted-media;gyroscope;
-picture-in-picture; web-share" allowfullscreen>
-</iframe>
-
-## Запустите proxybot самостоятельно
+## Установка и запуск proxybot
 
 Proxybot может быть запущен как [serverless функция]
 или как [приложение Flask].
@@ -73,16 +56,9 @@ Proxybot получает его как часть URL в webhook и испол�
 пока отрабатывает входящий запрос из Telegram.
 
 
-## Поддержка
-
-Контакт для обратной связи и по любым вопросам - [@devproxybot].
-
-
 [serverless функция]: Telegram-Bot-Serverless.md
 [приложение Flask]: Telegram-Bot-Flask.md
-[@InitProxybot]: https://t.me/InitProxybot
 [@my_id_bot]: https://t.me/my_id_bot
-[@devproxybot]: https://t.me/devproxybot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
 [репозитории]: https://github.com/litnialex/telegram-proxybot

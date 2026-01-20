@@ -28,23 +28,7 @@ To reapeat this you will need:
 **Voice** messages, **video** messages, **files** and any other media-format
 supported by the Telegram can be proxied in this manner.
 
-## Use proxybot as a service
-This bot: [@InitProxybot] can launch your proxybot in the cloud within seconds.
-
-This is offered as a service from proxybot developer with an annual subscription fee of $20.
-
-You get 4 months of free usage, prepay is not required.
-
-*It's extremely easy to start using proxybot.*
-
-<iframe width="315" height="560"
-src="https://www.youtube.com/embed/OgT1-AoHagU"
-title="YouTube video player" frameborder="0"
-allow="accelerometer; autoplay; clipboard-write; encrypted-media;gyroscope;
-picture-in-picture; web-share" allowfullscreen>
-</iframe>
-
-## Launch by your own
+## Installation
 
 Proxybot can be launched as a [serverless function] or as a [Flask application].
 
@@ -69,16 +53,10 @@ Proxybot receives it as part of the webhook URL
 and uses it only until finishing handling the incoming request.
 
 
-## Feedback
-
-Contact [@devproxybot] for any questions or feedback.
-
 
 [serverless function]: Telegram-Bot-Serverless.md
 [Flask application]: Telegram-Bot-Flask.md
-[@InitProxybot]: https://t.me/InitProxybot
 [@my_id_bot]: https://t.me/my_id_bot
-[@devproxybot]: https://t.me/devproxybot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
 [repository]: https://github.com/litnialex/telegram-proxybot
