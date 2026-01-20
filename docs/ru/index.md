@@ -47,9 +47,6 @@ Proxybot может быть запущен как [serverless функция]
 
 Proxybot разработан с уважением к защите персональных данных и вниманием к вопросам безопасности.
 Исходный код бота открыт и бесплатен на 100%.
-Когда вы пользуетесь нашим сервисом для запуска proxybot,
-мы несём ответственность за выполнение в точности того же когда,
-что опубликован в [репозитории].
 
 Значение `TOKEN` нигде в базе данных не сохраняется.
 Proxybot получает его как часть URL в webhook и использует его
@@ -61,4 +58,3 @@ Proxybot получает его как часть URL в webhook и испол�
 [@my_id_bot]: https://t.me/my_id_bot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
-[репозитории]: https://github.com/litnialex/telegram-proxybot

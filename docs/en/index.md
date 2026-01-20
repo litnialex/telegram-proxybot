@@ -45,8 +45,6 @@ If you want to find out your telegram ID ask [@my_id_bot].
 
 Proxybot is designed with respect to personal privacy and security in mind.
 The source code of the bot is 100% open and free.
-When you use our service to run proxybot we take the responsability to run
-exactly the same code, which is published in the [repository].
 
 `TOKEN` value is not stored anywhere in the database.
 Proxybot receives it as part of the webhook URL
@@ -59,4 +57,3 @@ and uses it only until finishing handling the incoming request.
 [@my_id_bot]: https://t.me/my_id_bot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
-[repository]: https://github.com/litnialex/telegram-proxybot
