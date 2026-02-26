@@ -1,1 +1,1 @@
-Documentation is located at https://proxybot.dev
+Documentation is located at https://litnialex.github.io/telegram-proxybot/
