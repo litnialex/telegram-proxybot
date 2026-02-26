@@ -52,15 +52,10 @@ Proxybot разработан с уважением к защите персон
 Proxybot получает его как часть URL в webhook и использует его
 пока отрабатывает входящий запрос из Telegram.
 
-## Поддержка
-
-Контакт для обратной связи и по любым вопросам - [@SashaConnectBot].
-
 
 [serverless функция]: Telegram-Bot-Serverless.md
 [приложение Flask]: Telegram-Bot-Flask.md
 [@my_id_bot]: https://t.me/my_id_bot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
-[@SashaConnectBot]: https://t.me/SashaConnectBot
 

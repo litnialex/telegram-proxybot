@@ -2,7 +2,7 @@ site_name: Телеграм Proxybot
 docs_dir: '../docs/ru'
 site_dir: '../site/ru'
 site_description: Телеграм бот proxybot
-site_url: https://proxybot.dev
+site_url: https://litnialex.github.io/telegram-proxybot
 repo_url: https://github.com/litnialex/telegram-proxybot/
 use_directory_urls: false
 nav:

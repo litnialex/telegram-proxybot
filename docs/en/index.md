@@ -50,15 +50,10 @@ The source code of the bot is 100% open and free.
 Proxybot receives it as part of the webhook URL
 and uses it only until finishing handling the incoming request.
 
-## Feedback
-
-Contact [@SashaConnectBot] for any questions or feedback.
-
 
 [serverless function]: Telegram-Bot-Serverless.md
 [Flask application]: Telegram-Bot-Flask.md
 [@my_id_bot]: https://t.me/my_id_bot
 [Telegram]: https://www.telegram.org
 [MongoDB Atlas]: https://www.mongodb.com/docs/atlas/
-[@SashaConnectBot]: https://t.me/SashaConnectBot
 

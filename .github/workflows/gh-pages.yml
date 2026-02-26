@@ -37,7 +37,6 @@ jobs:
       - run: |
           mkdocs build -f mkdocs/en.yml
           mkdocs build -f mkdocs/ru.yml
-          echo proxybot.dev > site/CNAME
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
